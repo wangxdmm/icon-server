@@ -1,0 +1,17 @@
+@font-face {
+  font-family: "{{fontname}}";
+  src:url("{{woff2Link}}?t={{timestamp}}") format("woff2"),
+  url("{{woffLink}}?t={{timestamp}}") format("woff"),
+  url('{{ttfLink}}?t={{timestamp}}') format('truetype'); /* chrome, firefox, opera, Safari, Android, iOS 4.2+*/
+}
+
+[class^="{{prefix}}-"], [class*=" {{prefix}}-"] {
+  font-family: '{{fontname}}' !important;
+  font-size:{{fontSize}};
+  font-style:normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+
+{{cssString}}
