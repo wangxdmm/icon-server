@@ -1,4 +1,5 @@
 const { nodeExternalsPlugin } = require('esbuild-node-externals')
+const { esbuildDecorators } = require('esbuild-plugin-ts-decorators')
 
 require('esbuild')
   .build({
@@ -10,6 +11,7 @@ require('esbuild')
       nodeExternalsPlugin({
         dependencies: false,
       }),
+      esbuildDecorators(),
     ],
     external: ['cors', 'kcors'],
   })

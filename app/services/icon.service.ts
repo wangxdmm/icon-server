@@ -19,12 +19,15 @@ import { success, fail } from 'app/helpers/server'
 import { ErrorResponse, ERROR_NUM } from 'app/vo/error'
 import type { CSSOptions } from 'app/entity/icon'
 import mustache from 'mustache'
-import jsdom from 'jsdom'
+// import jsdom from 'jsdom'
+import { parse } from 'node-html-parser';
 import type { IconEntity } from 'app/entity/icon'
+
 @Service()
 export class IconService {
   private temporaryDir = pathResolve(__dirname, './assets')
-  private cssTplUrl = pathResolve(__dirname, '../templates/css.mustache')
+  // TODO static url should resolve
+  private cssTplUrl = pathResolve('', 'app/templates/css.mustache')
 
   assetsType = ['ttf', 'woff', 'woff2', 'css'] as const
 
@@ -210,8 +213,8 @@ export class IconService {
   transSvgSymbolToSvg(s: string): string | undefined {
     const symbolStr = s.trim()
     if (this.isSVGSymbol(symbolStr)) {
-      const symbolDom = new jsdom.JSDOM(symbolStr)
-      const symbolNodes = symbolDom.window.document.querySelectorAll('symbol')
+      const symbolDom = parse(symbolStr)
+      const symbolNodes = symbolDom.querySelectorAll('symbol')
       if (symbolNodes.length > 1 || symbolNodes.length <= 0) {
         return
       } else {
