@@ -19,8 +19,8 @@ import { success, fail } from 'app/helpers/server'
 import { ErrorResponse, ERROR_NUM } from 'app/vo/error'
 import type { CSSOptions } from 'app/entity/icon'
 import mustache from 'mustache'
-import { unescapeUnicode } from 'app/helpers/code'
-
+import jsdom from 'jsdom'
+import type { IconEntity } from 'app/entity/icon'
 @Service()
 export class IconService {
   private temporaryDir = pathResolve(__dirname, './assets')
@@ -30,6 +30,7 @@ export class IconService {
 
   genIconAssets(iconAssetsMessage: IconAssetsMessage) {
     return new Promise(resolve => {
+      const inValidIcons: IconEntity[] = []
       const fontStream = new SVGIcons2SVGFont({
         log: message => print.log(message),
         ...{
@@ -46,18 +47,40 @@ export class IconService {
       let cssString = ''
 
       for (let i = 0; i < icons.length; i++) {
-        const { name, svg, unicode } = icons[i]
+        const { name, svg, unicode, symbol } = icons[i]
         if (name) {
-          cssString += `.${projectName}-${name}:before { content: "\\${unicode.charCodeAt(0).toString(16)}";}\n`
+          cssString += `.${projectName}-${name}:before { content: "\\${unicode
+            .charCodeAt(0)
+            .toString(16)}";}\n`
         }
-        const glyph = stringToStream(svg) as ReadStream & {
+        let svgStr = svg
+        // svg源文件不存在 但是symbol存在
+        if (!svg && symbol) {
+          svgStr = this.transSvgSymbolToSvg(symbol)
+        }
+
+        if (!svgStr) {
+          inValidIcons.push(icons[i])
+          continue
+        }
+
+        const glyph = stringToStream(svgStr) as ReadStream & {
           metadata: { unicode: string[]; name: string }
         }
+
         glyph.metadata = {
           unicode: [unicode],
           name: name,
         }
         fontStream.write(glyph)
+      }
+      // 过滤出不合法的icon
+      if (inValidIcons.length) {
+        resolve(
+          fail(ERROR_NUM.NODE_INTERNAL_ERROR, '资源不合法', 'invalid svg or symbol', {
+            errorDetail: inValidIcons,
+          }),
+        )
       }
 
       const chunks = []
@@ -107,6 +130,7 @@ export class IconService {
                       ttf,
                       woff,
                       woff2,
+                      cssHref: genLink(css.url, CONSTANTS.SC_WEB_URL),
                     } as IconAssetsMetaMessage,
                     `${projectName}图标资源已经生成`,
                   ),
@@ -177,6 +201,30 @@ export class IconService {
     } finally {
       fs.mkdirSync(this.temporaryDir, { recursive: true })
     }
+  }
+
+  isSVGSymbol(s: string) {
+    return s.startsWith('<symbol')
+  }
+
+  transSvgSymbolToSvg(s: string): string | undefined {
+    const symbolStr = s.trim()
+    if (this.isSVGSymbol(symbolStr)) {
+      const symbolDom = new jsdom.JSDOM(symbolStr)
+      const symbolNodes = symbolDom.window.document.querySelectorAll('symbol')
+      if (symbolNodes.length > 1 || symbolNodes.length <= 0) {
+        return
+      } else {
+        const symbolRoot = symbolNodes[0]
+        const viewBox = symbolRoot.getAttribute('viewBox')
+        const innerHTML = symbolRoot.innerHTML
+        const viewBoxValue = viewBox ? (viewBox.trim() ? viewBox : undefined) : undefined
+        return `<svg xmlns="http://www.w3.org/2000/svg" ${
+          viewBoxValue ? `viewBox="${viewBox}"` : ''
+        }>${innerHTML}</svg>`
+      }
+    }
+    return
   }
 
   createCss(options: CSSOptions): Buffer | undefined {
