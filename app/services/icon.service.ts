@@ -101,8 +101,6 @@ export class IconService {
           const woffBuf = Buffer.from(ttf2woff(ttfBuf).buffer)
           const woff2Buf = Buffer.from(ttf2woff2(ttfBuf).buffer)
 
-          this.createTTF(ttfBuf)
-
           uploads.push(
             this.uploadAssets(ttfBuf, assetNames.ttf),
             this.uploadAssets(woffBuf, assetNames.woff),
@@ -241,7 +239,6 @@ export class IconService {
   }
 
   createTTF(buffer: Buffer) {
-    this.createAssetDir()
     fs.writeFileSync(pathResolve(this.temporaryDir, './icon.ttf'), buffer, {})
   }
 

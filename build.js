@@ -1,5 +1,24 @@
 const { nodeExternalsPlugin } = require('esbuild-node-externals')
 const { esbuildDecorators } = require('esbuild-plugin-ts-decorators')
+const fs = require('fs')
+const path = require('path')
+
+function resolve(file) {
+  return path.resolve(__dirname, file)
+}
+
+const distDir = resolve('./dist')
+const hasDistDir = fs.existsSync(distDir)
+if (hasDistDir) {
+  fs.rmSync(distDir, { force: true, recursive: true })
+}
+fs.mkdirSync(distDir)
+
+// ttf2woff2 need this file to require, but esbuild can not cp this
+fs.copyFileSync(
+  resolve('./node_modules/ttf2woff2/jssrc/ttf2woff2.wasm'),
+  resolve('./dist/ttf2woff2.wasm'),
+)
 
 require('esbuild')
   .build({
@@ -13,6 +32,8 @@ require('esbuild')
       }),
       esbuildDecorators(),
     ],
+    minify: true,
+    sourcemap: false,
     external: ['cors', 'kcors'],
   })
   .catch(err => {

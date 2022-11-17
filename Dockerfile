@@ -1,5 +1,6 @@
 FROM mhart/alpine-node:16
+LABEL low code platform icon server
 USER 0
-RUN curl -fsSL https://get.pnpm.io/install.sh | sh - && \
-/bin/bash -c 'source /root/.bashrc && pnpm --version'
-ENTRYPOINT [ "/bin/bash", "source ~/.zshrc" ]
+ENV NODE_EN production
+COPY dist /
+CMD node /dist/index.js

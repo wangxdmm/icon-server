@@ -28,7 +28,7 @@ const data = JSON.stringify({
 })
 
 axios
-  .post('http://localhost:3001/icon-server/assets', data, {
+  .post('http://localhost:8016/icon-server/assets', data, {
     headers: {
       'Content-Type': 'application/json',
     },
