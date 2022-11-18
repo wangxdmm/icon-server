@@ -131,7 +131,7 @@ export class IconService {
                       ttf,
                       woff,
                       woff2,
-                      cssHref: genLink(css.url, CONSTANTS.SC_WEB_URL),
+                      cssHref: genLink(css.url),
                     } as IconAssetsMetaMessage,
                     `${projectName}图标资源已经生成`,
                   ),
