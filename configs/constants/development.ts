@@ -1,7 +1,7 @@
 const development = {
   ENV_LABEL: 'DEVELOPMENT',
 
-  PORT: 3001,
+  PORT: 6000,
 
   SC_FILE_SERVER: 'http://192.168.1.154:8015',
 

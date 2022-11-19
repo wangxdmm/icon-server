@@ -13,21 +13,23 @@ import ttf2woff from 'ttf2woff'
 import ttf2woff2 from 'ttf2woff2'
 import FormData from 'form-data'
 import axios, { type AxiosResponse } from 'axios'
-import CONSTANTS from 'configs/constants'
+import CONSTANTS, { isProd } from 'configs/constants'
 import { FileUploadResultDetail } from 'app/dto/file'
 import { success, fail } from 'app/helpers/server'
 import { ErrorResponse, ERROR_NUM } from 'app/vo/error'
 import type { CSSOptions } from 'app/entity/icon'
 import mustache from 'mustache'
 // import jsdom from 'jsdom'
-import { parse } from 'node-html-parser';
+import { parse } from 'node-html-parser'
 import type { IconEntity } from 'app/entity/icon'
 
 @Service()
 export class IconService {
-  private temporaryDir = pathResolve(__dirname, './assets')
+  private temporaryDir = pathResolve(__dirname, './fontAssets')
   // TODO static url should resolve
-  private cssTplUrl = pathResolve('', 'app/templates/css.mustache')
+  private cssTplUrl = isProd()
+    ? pathResolve(__dirname, './templates/css.mustache')
+    : pathResolve('', 'app/templates/css.mustache')
 
   assetsType = ['ttf', 'woff', 'woff2', 'css'] as const
 
@@ -50,11 +52,11 @@ export class IconService {
       let cssString = ''
 
       for (let i = 0; i < icons.length; i++) {
-        const { name, svg, unicode, symbol } = icons[i]
+        // use code as name
+        const { code: name, svg, unicode, symbol } = icons[i]
+        const hexStr = unicode.charCodeAt(0).toString(16)
         if (name) {
-          cssString += `.${projectName}-${name}:before { content: "\\${unicode
-            .charCodeAt(0)
-            .toString(16)}";}\n`
+          cssString += `.${projectName}-${name}:before, .${projectName}-${unicode}:before { content: "\\${hexStr}";}\n`
         }
         let svgStr = svg
         // svg源文件不存在 但是symbol存在

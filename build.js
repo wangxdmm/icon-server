@@ -13,12 +13,15 @@ if (hasDistDir) {
   fs.rmSync(distDir, { force: true, recursive: true })
 }
 fs.mkdirSync(distDir)
+fs.mkdirSync(`${distDir}/templates`)
 
 // ttf2woff2 need this file to require, but esbuild can not cp this
 fs.copyFileSync(
   resolve('./node_modules/ttf2woff2/jssrc/ttf2woff2.wasm'),
   resolve('./dist/ttf2woff2.wasm'),
 )
+
+fs.cpSync(resolve('./app/templates'), resolve('./dist/templates'), { recursive: true })
 
 require('esbuild')
   .build({
