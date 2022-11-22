@@ -53,10 +53,12 @@ export class IconService {
 
       for (let i = 0; i < icons.length; i++) {
         // use code as name
-        const { code: name, svg, unicode, symbol } = icons[i]
+        const { code: name, svg, unicode: hexStrIn, symbol } = icons[i]
+        // unicode 得到的参数是 字符串的 16进制
+        const unicode = String.fromCharCode(parseInt(hexStrIn, 16))
         const hexStr = unicode.charCodeAt(0).toString(16)
         if (name) {
-          cssString += `.${projectName}-${name}:before, .${projectName}-${unicode}:before { content: "\\${hexStr}";}\n`
+          cssString += `.${projectName}-${name}:before, .${projectName}-${hexStr}:before { content: "\\${hexStr}";}\n`
         }
         let svgStr = svg
         // svg源文件不存在 但是symbol存在

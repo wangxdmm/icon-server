@@ -1,0 +1,35 @@
+stages:
+  - pack
+  - docker_build
+
+variables:
+  CURRENT_BRANCH: $CI_COMMIT_REF_NAME
+  GIT_DEPTH: 30
+
+pack:
+  interruptible: true
+  stage: pack
+  image: 192.168.1.61:5000/pnpm-slim
+  artifacts:
+    paths:
+      - dist/
+    expire_in: 1 day
+  script:
+    - pnpm install
+    - pnpm prod:build
+
+docker_build:
+  interruptible: true
+  stage: docker_build
+  image: docker:stable
+  variables: 
+    DOCKER_TLS_CERTDIR: "/certs"
+  services:
+    - docker:stable-dind
+  before_script:
+    - docker info
+  script:
+    - docker build --force-rm --no-cache -t 192.168.1.61:5000/sc-icon-server:latest .
+    - docker push 192.168.1.61:5000/sc-icon-server:latest
+  only:
+    - dev
