@@ -9,7 +9,6 @@ variables:
 pack:
   interruptible: true
   stage: pack
-  image: 192.168.1.61:5000/pnpm-slim
   artifacts:
     paths:
       - dist/
@@ -17,6 +16,8 @@ pack:
   script:
     - pnpm install
     - pnpm prod:build
+  only:
+    - dev
 
 docker_build:
   interruptible: true
