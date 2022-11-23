@@ -13,6 +13,7 @@ export const bootstrapBefore = (): object => {
     print.danger('Environment variable not loaded: not found ".env" file.')
     return {}
   }
+  
   print.log(`${envFileName} loaded.`)
   return result.parsed
 }
